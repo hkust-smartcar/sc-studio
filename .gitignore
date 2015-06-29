@@ -1,0 +1,9 @@
+# Ignore all sub-dirs but src/
+*/*
+!src/*
+__pycache__
+
+# Ignore additional files in root dir
+# Eclipse
+.project
+.pydevproject
