@@ -38,7 +38,7 @@ class RawView(View):
 		i = 0
 		text = ""
 		while self._input_queue and i < 10:
-			++i
+			i += 1
 			text += super(RawView, self).get_input()
 		if not text:
 			return
@@ -47,7 +47,7 @@ class RawView(View):
 		self._text.insert(tkinter.END, text)
 		if is_bottom:
 			self._text.yview(tkinter.END)
-			
+
 	def _io_thread_main(self):
 		while self._is_thread_run:
 			text = sys.stdin.read(50)
