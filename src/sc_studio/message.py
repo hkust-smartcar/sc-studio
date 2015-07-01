@@ -17,7 +17,7 @@ class Message(object):
 class MessageBuilder(object):
 	def __init__(self):
 		self._reset()
-		
+
 	def push(self, data) -> Message:
 		if not self._is_start and data != config.MSG_BEGIN:
 			pass
@@ -52,7 +52,7 @@ class MessageBuilder(object):
 		self._token = None
 		self._size = None
 		self._buf = []
-		
+
 	def _parse_size(self, buf) -> int:
 		size = 0
 		for i in range(3):
