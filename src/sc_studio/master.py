@@ -24,7 +24,8 @@ class Master(object):
 			(1, "String", "_on_choose_string"),
 			(2, "CCD graph", "_on_choose_ccd_graph"),
 			(3, "CCD image", "_on_choose_ccd_image"),
-			(4, "Exit", "_on_choose_exit")]
+			(4, "Camera", "_on_choose_camera"),
+			(5, "Exit", "_on_choose_exit")]
 
 	def __init__(self, params : list):
 		self._dev = params["dev"]
@@ -68,16 +69,16 @@ class Master(object):
 				if msg is not None:
 					self._dispatch(msg)
 
-				remove_processes = []
-				for p in self._raw_processes:
-					try:
-						p.stdin.write(d)
-					except BrokenPipeError:
-						# likely closed
-						remove_processes.append(p)
-				if remove_processes:
-					self._raw_processes[:] = [p for p in self._raw_processes
-							if p not in remove_processes]
+			remove_processes = []
+			for p in self._raw_processes:
+				try:
+					p.stdin.write(data)
+				except BrokenPipeError:
+					# likely closed
+					remove_processes.append(p)
+			if remove_processes:
+				self._raw_processes[:] = [p for p in self._raw_processes
+						if p not in remove_processes]
 
 	def _dispatch(self, msg : message.Message):
 		remove_views = []
@@ -87,7 +88,7 @@ class Master(object):
 					hex_str = codecs.encode(bytes(msg.data), "hex")
 					v[0].stdin.write(hex_str)
 					v[0].stdin.write(b'\n')
-					v[0].stdin.flush()
+					# v[0].stdin.flush()
 			except BrokenPipeError:
 				# likely closed
 				remove_views.append(v)
@@ -130,6 +131,12 @@ class Master(object):
 				+ "/main.py -vccd_image --varg=ccd_id=" + str(ccd_id)
 		p = subprocess.Popen(cmd, stdin = subprocess.PIPE, shell = True)
 		self._views.append((p, [config.MSG_CCD_DATA]))
+
+	def _on_choose_camera(self):
+		cmd = sys.executable + ' ' + os.path.dirname(os.path.realpath(__file__)) \
+				+ "/main.py -vcamera"
+		p = subprocess.Popen(cmd, stdin = subprocess.PIPE, shell = True)
+		self._views.append((p, [config.MSG_CAMERA]))
 
 	def _on_choose_exit(self):
 		print("Killing views...")

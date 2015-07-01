@@ -44,6 +44,12 @@ def _start_ccd_image(view_args : dict):
 	app = clz(view_args)
 	app.run()
 
+def _start_camera(view_args : dict):
+	module = __import__("camera_view")
+	clz = getattr(module, "CameraView")
+	app = clz(view_args)
+	app.run()
+
 def _init_logging():
 	if not config.LOGFILE:
 		return
