@@ -82,7 +82,7 @@ def main(argv : list):
 				if index == -1:
 					view_args[arg] = True
 				else:
-					view_args[arg[:index]] = arg[index + 1]
+					view_args[arg[:index]] = arg[index + 1:]
 	except (getopt.GetoptError, ValueError):
 		_print_usage()
 		sys.exit(2)
