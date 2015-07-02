@@ -29,6 +29,8 @@ class Master(object):
 
 	def __init__(self, params : list):
 		self._dev = params["dev"]
+		self._preinput = params["preinput"]
+
 		self._com = None
 		self._views = []
 		self._raw_processes = []
@@ -111,7 +113,7 @@ class Master(object):
 	def _on_choose_ccd_graph(self):
 		while True:
 			try:
-				ccd_id = int(input("CCD id:\n> "))
+				ccd_id = int(self._get_input("CCD id:\n> "))
 				break
 			except ValueError:
 				print("Input error")
@@ -123,7 +125,7 @@ class Master(object):
 	def _on_choose_ccd_image(self):
 		while True:
 			try:
-				ccd_id = int(input("CCD id:\n> "))
+				ccd_id = int(self._get_input("CCD id:\n> "))
 				break
 			except ValueError:
 				print("Input error")
@@ -135,7 +137,7 @@ class Master(object):
 	def _on_choose_camera(self):
 		while True:
 			try:
-				multiplier = int(input("View size multiplier:\n> "))
+				multiplier = int(self._get_input("View size multiplier:\n> "))
 				break
 			except ValueError:
 				print("Input error")
@@ -178,7 +180,7 @@ class Master(object):
 		while True:
 			self._print_menu()
 			try:
-				choice = int(input("> "))
+				choice = int(self._get_input("> "))
 			except ValueError:
 				print("Input error")
 				continue
@@ -194,3 +196,17 @@ class Master(object):
 		print("Select view:")
 		for pos, label, _ in Master._SELECTIONS:
 			print(str(pos) + ". " + label)
+
+	def _get_input(self, label) -> str:
+		if self._preinput:
+			found = self._preinput.find(',')
+			if found != -1:
+				product = self._preinput[:found];
+				self._preinput = self._preinput[found + 1:]
+			else:
+				product = self._preinput;
+				self._preinput = None
+			print(label + product)
+			return product
+		else:
+			return input("> ")

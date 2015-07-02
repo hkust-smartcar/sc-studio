@@ -12,7 +12,7 @@ import sys
 from sc_studio import config
 
 def _print_usage():
-	print("Usage: main.py -d <device>")
+	print("Usage: main.py -d <device> [commands...]")
 
 def _start_master(view_args : dict):
 	module = __import__("master")
@@ -69,7 +69,8 @@ def main(argv : list):
 	view_args = {}
 
 	try:
-		opts, _ = getopt.gnu_getopt(argv, "d:hv:", ["dev=", "help", "varg="])
+		opts, other_args = getopt.gnu_getopt(argv, "d:hv:",
+				["dev=", "help", "varg="])
 		for opt, arg in opts:
 			if opt in ("-d", "--dev"):
 				dev = arg
@@ -97,6 +98,7 @@ def main(argv : list):
 	else:
 		view_name = "master"
 		view_args["dev"] = dev
+		view_args["preinput"] = other_args[0]
 
 	globals()["_start_" + view_name](view_args)
 
