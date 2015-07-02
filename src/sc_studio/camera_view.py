@@ -91,11 +91,12 @@ class CameraView(View):
 
 		byte_pos = 0
 		bit_pos = 0
-		display = [bytearray(b' ' * 80) for i in range(60)]
+		display = [bytearray(b' ' * 160) for i in range(60)]
 		for i in range(60):
 			for j in range(80):
 				if hex_data[byte_pos] & (0x80 >> bit_pos):
-					display[i][j] = ord('#');
+					display[i][j * 2] = ord('#');
+					display[i][j * 2 + 1] = ord('#');
 				bit_pos += 1
 				if bit_pos >= 8:
 					bit_pos = 0
