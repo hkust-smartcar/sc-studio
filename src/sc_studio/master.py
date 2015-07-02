@@ -133,8 +133,14 @@ class Master(object):
 		self._views.append((p, [config.MSG_CCD_DATA]))
 
 	def _on_choose_camera(self):
+		while True:
+			try:
+				multiplier = int(input("View size multiplier:\n> "))
+				break
+			except ValueError:
+				print("Input error")
 		cmd = sys.executable + ' ' + os.path.dirname(os.path.realpath(__file__)) \
-				+ "/main.py -vcamera"
+				+ "/main.py -vcamera --varg=multiplier=" + str(multiplier)
 		p = subprocess.Popen(cmd, stdin = subprocess.PIPE, shell = True)
 		self._views.append((p, [config.MSG_CAMERA]))
 

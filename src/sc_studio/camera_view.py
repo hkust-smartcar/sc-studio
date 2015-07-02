@@ -18,7 +18,9 @@ class CameraView(View):
 	def __init__(self, params):
 		super(CameraView, self).__init__(params)
 
-		self._multiplier = 4
+		self._multiplier = int(params["multiplier"]) if "multiplier" in params \
+				else 1
+		self._multiplier = max(self._multiplier, 1)
 
 		self._tk = Tk()
 		self._canvas = Canvas(self._tk, width = 80 * self._multiplier,
