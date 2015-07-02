@@ -8,6 +8,7 @@ Refer to LICENSE for details
 
 import binascii
 import logging
+from PIL import Image, ImageTk
 import time
 import tkinter
 from tkinter import Tk, Canvas
@@ -17,7 +18,7 @@ class CameraView(View):
 	def __init__(self, params):
 		super(CameraView, self).__init__(params)
 
-		self._multiplier = 3
+		self._multiplier = 4
 
 		self._tk = Tk()
 		self._canvas = Canvas(self._tk, width = 80 * self._multiplier,
@@ -68,27 +69,12 @@ class CameraView(View):
 			hex_data = binascii.unhexlify(hex_str)
 		except TypeError as e:
 			logging.debug(str(e))
-			return None
+			return
 
-		byte_pos = 0
-		bit_pos = 0
-		bmp = tkinter.PhotoImage(width = 80 * self._multiplier,
-				height = 60 * self._multiplier)
-		for y in range(60):
-			for y_mul in range(self._multiplier):
-				y_ = y * self._multiplier + y_mul
-				for x in range(80):
-					is_white = not (hex_data[byte_pos] & (0x80 >> bit_pos))
-					for x_mul in range(self._multiplier):
-						x_ = x * self._multiplier + x_mul
-						if is_white:
-							bmp.put("#FFFFFF", (x_, y_))
-						else:
-							bmp.put("#000000", (x_, y_))
-					bit_pos += 1
-					if bit_pos >= 8:
-						bit_pos = 0
-						byte_pos += 1
+		img = Image.frombytes(mode = '1', size = (80, 60), data = hex_data)
+		img = img.resize((80 * self._multiplier, 60 * self._multiplier))
+		bmp = ImageTk.BitmapImage(image = img, foreground = "black",
+				background = "white")
 		return bmp
 
 	def _get_display_list(self, hex_str):
