@@ -9,7 +9,7 @@ Refer to LICENSE for details
 import binascii
 import logging
 import os
-from PIL import Image, ImageTk
+from PIL import Image, ImageOps, ImageTk
 import time
 import tkinter
 from tkinter import Tk, Canvas
@@ -51,8 +51,8 @@ class CameraView(View):
 		if img is None:
 			return
 
-		bmp = ImageTk.BitmapImage(image = img, foreground = "black",
-				background = "white")
+		bmp = ImageTk.BitmapImage(image = img, foreground = "white",
+				background = "black")
 		self._canvas.create_image(0, 0, image = bmp, anchor = tkinter.NW)
 		self._tk_image = bmp
 
@@ -68,6 +68,8 @@ class CameraView(View):
 	def _get_image(self, hex_str) -> Image:
 		try:
 			hex_data = binascii.unhexlify(hex_str)
+			# Invert data from MCU
+			hex_data = bytes([~h & 0xFF for h in hex_data])
 		except TypeError as e:
 			logging.debug(str(e))
 			return
