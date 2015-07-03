@@ -98,7 +98,8 @@ def main(argv : list):
 	else:
 		view_name = "master"
 		view_args["dev"] = dev
-		view_args["preinput"] = other_args[0]
+		if other_args:
+			view_args["preinput"] = other_args[0]
 
 	globals()["_start_" + view_name](view_args)
 
