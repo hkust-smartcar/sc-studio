@@ -6,7 +6,9 @@ Copyright (c) 2014-2015 HKUST SmartCar Team
 Refer to LICENSE for details
 '''
 
+import binascii
 import codecs
+from collections import deque
 import logging
 import os
 import sys
@@ -14,7 +16,7 @@ import subprocess
 import time
 import serial
 from sc_studio import config, console_utils, message
-from threading import Thread
+from threading import Thread, Lock, Semaphore
 
 class Master(object):
 	VERSION_STR = "0.9 dev"
@@ -25,6 +27,8 @@ class Master(object):
 			('2', "CCD graph", "_on_choose_ccd_graph"),
 			('3', "CCD image", "_on_choose_ccd_image"),
 			('4', "Camera", "_on_choose_camera"),
+			('t', "Send text", "_on_choose_send_text"),
+			('h', "Send hex", "_on_choose_send_hex"),
 			('x', "Exit", "_on_choose_exit")]
 
 	def __init__(self, params : list):
@@ -35,9 +39,15 @@ class Master(object):
 		self._views = []
 		self._raw_processes = []
 
-		self._is_thread_run = True
-		self._input_thread = Thread(target = self._io_thread_main)
+		self._is_i_thread_run = True
+		self._i_thread = Thread(target = self._i_thread_main)
 		self._msg_builder = message.MessageBuilder()
+
+		self._is_o_thread_run = True
+		self._o_thread = Thread(target = self._o_thread_main)
+		self._out_queue = deque()
+		self._out_queue_mutex = Lock()
+		self._out_queue_semaphore = Semaphore(0)
 
 	def run(self):
 		print("ScStudio " + Master.VERSION_STR)
@@ -45,10 +55,11 @@ class Master(object):
 		print("Connecting to " + self._dev + "...")
 		while not self._connect():
 			print("Failed connecting to " + self._dev + ", retrying...")
-		self._input_thread.start()
+		self._i_thread.start()
+		self._o_thread.start()
 		self._run_menu()
 
-	def _io_thread_main(self):
+	def _i_thread_main(self):
 # 		i = 0
 # 		ary = [b"00", b"10", b"20", b"30", b"40", b"50", b"60", b"70", b"80",
 # 				b"90", b"A0", b"B0", b"C0", b"D0", b"E0", b"F0"]
@@ -63,7 +74,7 @@ class Master(object):
 # 			self._dispatch(msg)
 # 			time.sleep(1.0)
 
-		while self._is_thread_run:
+		while self._is_i_thread_run:
 			self._com.timeout = .01
 			data = self._com.read(0xFF)
 			for d in data:
@@ -81,6 +92,17 @@ class Master(object):
 			if remove_processes:
 				self._raw_processes[:] = [p for p in self._raw_processes
 						if p not in remove_processes]
+
+	def _o_thread_main(self):
+		while self._is_o_thread_run:
+			if not self._out_queue_semaphore.acquire(timeout = 1):
+				continue
+			self._out_queue_mutex.acquire()
+			try:
+				send = self._out_queue.popleft()
+				self._com.write(send)
+			finally:
+				self._out_queue_mutex.release()
 
 	def _dispatch(self, msg : message.Message):
 		remove_views = []
@@ -146,6 +168,37 @@ class Master(object):
 		p = subprocess.Popen(cmd, stdin = subprocess.PIPE, shell = True)
 		self._views.append((p, [config.MSG_CAMERA]))
 
+	def _on_choose_send_text(self):
+		inp = self._get_input("> ")
+		byte_data = inp.encode(encoding = "UTF-8").decode("unicode_escape")\
+				.encode(encoding = "UTF-8")
+		self._out_queue_mutex.acquire()
+		try:
+			self._out_queue.append(byte_data)
+			self._out_queue_semaphore.release()
+		finally:
+			self._out_queue_mutex.release()
+
+	def _on_choose_send_hex(self):
+		while True:
+			inp = self._get_input("> ")
+			if len(inp) % 2:
+				print("Number of char is odd")
+				continue
+			try:
+				byte_data = binascii.unhexlify(inp)
+			except:
+				print("Error input")
+				continue
+
+			self._out_queue_mutex.acquire()
+			try:
+				self._out_queue.append(byte_data)
+				self._out_queue_semaphore.release()
+			finally:
+				self._out_queue_mutex.release()
+			break
+
 	def _on_choose_exit(self):
 		print("Killing views...")
 		for v in self._views:
@@ -163,15 +216,18 @@ class Master(object):
 		self._com.close()
 
 		print("Ending process...")
-		self._is_thread_run = False
-		self._input_thread.join()
+		self._is_i_thread_run = False
+		self._is_o_thread_run = False
+		self._i_thread.join()
+		self._o_thread.join()
 		sys.exit(0)
 
 	def _connect(self) -> bool :
 		try:
 			self._com = serial.Serial(port = self._dev, baudrate = 115200,
 					bytesize = serial.EIGHTBITS, parity = serial.PARITY_NONE,
-					stopbits = serial.STOPBITS_ONE, timeout = .1)
+					stopbits = serial.STOPBITS_ONE, timeout = .01,
+					writeTimeout = .01)
 			return True
 		except serial.serialutil.SerialException:
 			return False
