@@ -33,7 +33,7 @@ class Master(object):
 
 	def __init__(self, params : list):
 		self._dev = params["dev"]
-		self._preinput = params["preinput"]
+		self._preinput = params["preinput"] if "preinput" in params else ""
 
 		self._com = None
 		self._views = []
