@@ -20,12 +20,12 @@ class Master(object):
 	VERSION_STR = "0.9 dev"
 
 	# id, label, module name, class name
-	_SELECTIONS = [(0, "Raw", "_on_choose_raw"),
-			(1, "String", "_on_choose_string"),
-			(2, "CCD graph", "_on_choose_ccd_graph"),
-			(3, "CCD image", "_on_choose_ccd_image"),
-			(4, "Camera", "_on_choose_camera"),
-			(5, "Exit", "_on_choose_exit")]
+	_SELECTIONS = [('0', "Raw", "_on_choose_raw"),
+			('1', "String", "_on_choose_string"),
+			('2', "CCD graph", "_on_choose_ccd_graph"),
+			('3', "CCD image", "_on_choose_ccd_image"),
+			('4', "Camera", "_on_choose_camera"),
+			('x', "Exit", "_on_choose_exit")]
 
 	def __init__(self, params : list):
 		self._dev = params["dev"]
@@ -180,14 +180,10 @@ class Master(object):
 		while True:
 			self._print_menu()
 			try:
-				choice = int(self._get_input("> "))
+				choice = self._get_input("> ")
+				index = [s[0] for s in Master._SELECTIONS].index(choice)
+				getattr(self, Master._SELECTIONS[index][2])()
 			except ValueError:
-				print("Input error")
-				continue
-
-			if choice < len(Master._SELECTIONS):
-				getattr(self, Master._SELECTIONS[choice][2])()
-			else:
 				print("Input error")
 
 	def _print_menu(self):
