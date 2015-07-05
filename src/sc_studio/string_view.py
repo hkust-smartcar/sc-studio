@@ -27,7 +27,7 @@ class StringView(View):
 
 		self._tk.protocol("WM_DELETE_WINDOW", self.on_press_close)
 
-		self._file = open("string_" + str(int(time.time() * 1000)), "w")
+		self._file = open("string_" + str(int(time.time() * 1000)) + ".txt", "w")
 
 	def run(self):
 		super(StringView, self).run()

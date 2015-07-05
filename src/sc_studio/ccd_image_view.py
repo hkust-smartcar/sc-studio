@@ -31,7 +31,7 @@ class CcdImageView(View):
 		self._tk.protocol("WM_DELETE_WINDOW", self.on_press_close)
 
 		self._file = open("ccd_image_" + str(self._ccd_id) + '_' \
-				+ str(int(time.time() * 1000)), "w")
+				+ str(int(time.time() * 1000)) + ".txt", "w")
 
 	def run(self):
 		super(CcdImageView, self).run()
