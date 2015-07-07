@@ -7,7 +7,7 @@ Refer to LICENSE for details
 '''
 
 # Comment out to disable logging
-LOGFILE = "log"
+LOGFILE = "scstudio.log"
 REMOTE_DEBUG = False
 PYSRC = ""
 
