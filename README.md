@@ -5,4 +5,4 @@ Sc Studio
 
 - Python 3
 - PySerial
-- Tkinter
+- Pillow
