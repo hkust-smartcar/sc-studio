@@ -112,7 +112,7 @@ class Master(object):
 					hex_str = codecs.encode(bytes(msg.data), "hex")
 					v[0].stdin.write(hex_str)
 					v[0].stdin.write(b'\n')
-					# v[0].stdin.flush()
+					v[0].stdin.flush()
 			except BrokenPipeError:
 				# likely closed
 				remove_views.append(v)
