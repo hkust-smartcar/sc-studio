@@ -45,9 +45,21 @@ class View(object):
 		self._is_thread_run = False
 		self._input_thread.join()
 
+	def is_test_input(self):
+		return False
+
+	def gen_test_input(self):
+		return None
+
 	def _io_thread_main(self):
 		while self._is_thread_run:
-			text = sys.stdin.readline()
+			if not self.is_test_input():
+				text = sys.stdin.readline()
+			else:
+				if "test_gen" not in locals():
+					test_gen = self.gen_test_input()
+				text = next(test_gen)
+
 			if not text:
 				logging.error("Failed while readline")
 				self.on_dismiss()
