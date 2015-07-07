@@ -23,7 +23,7 @@ class CcdImageView(View):
 
 		self._tk = Tk()
 		self._text = Text(self._tk, width = 128, bg = config.COL_GREY_900,
-				fg = config.COL_GREY_100, font = ("Courier", 5))
+				fg = config.COL_GREY_100, font = (config.FONT, 5))
 
 		self._tk.title("CCD image view [" + str(self._ccd_id) + ']')
 		self._text.pack(side = tkinter.LEFT, fill = tkinter.Y)

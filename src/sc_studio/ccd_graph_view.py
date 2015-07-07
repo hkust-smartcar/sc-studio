@@ -23,7 +23,7 @@ class CcdGraphView(View):
 		self._tk = Tk()
 		self._text = Text(self._tk, height = CcdGraphView._HEIGHT + 1,
 				width = 128, bg = config.COL_GREY_900, fg = config.COL_GREY_100,
-				font = ("Courier", 8))
+				font = (config.FONT, 8))
 
 		self._tk.title("CCD graph view [" + str(self._ccd_id) + ']')
 		self._tk.resizable(width = False, height = False)
