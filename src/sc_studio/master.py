@@ -27,6 +27,7 @@ class Master(object):
 			('2', "CCD graph", "_on_choose_ccd_graph"),
 			('3', "CCD image", "_on_choose_ccd_image"),
 			('4', "Camera", "_on_choose_camera"),
+			('5', "Graph", "_on_choose_graph"),
 			('t', "Send text", "_on_choose_send_text"),
 			('h', "Send hex", "_on_choose_send_hex"),
 			('x', "Exit", "_on_choose_exit")]
@@ -167,6 +168,32 @@ class Master(object):
 				+ "/main.py -vcamera --varg=multiplier=" + str(multiplier)
 		p = subprocess.Popen(cmd, stdin = subprocess.PIPE, shell = True)
 		self._views.append((p, [config.MSG_CAMERA]))
+
+	def _on_choose_graph(self):
+		while True:
+			try:
+				ids = self._get_input("ids (separate with space):\n> ")\
+						.split(' ')
+				# Make sure all could be casted to int
+				_ = [int(i) for i in ids]
+				labels = self._get_input("labels (separate with space):\n> ")\
+						.split(' ')
+				colors = self._get_input("colors (separate with space):\n> ")
+				if colors:
+					colors = colors.split(' ')
+				min_val = float(self._get_input("min:\n> "))
+				max_val = float(self._get_input("max:\n> "))
+				break
+			except ValueError:
+				print("Input error")
+		cmd = sys.executable + ' ' + os.path.dirname(os.path.realpath(__file__)) \
+				+ "/main.py -vgraph --varg=ids=\"" + ' '.join(ids) \
+				+ "\" --varg=labels=\"" + ' '.join(labels) + "\" --varg=min=" \
+				+ str(min_val) + " --varg=max=" + str(max_val)
+		if colors:
+			cmd += " --varg=colors=\"%s\"" % ' '.join(colors)
+		p = subprocess.Popen(cmd, stdin = subprocess.PIPE, shell = True)
+		self._views.append((p, [config.MSG_GRAPH]))
 
 	def _on_choose_send_text(self):
 		inp = self._get_input("> ")

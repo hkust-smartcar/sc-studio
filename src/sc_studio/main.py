@@ -50,6 +50,12 @@ def _start_camera(view_args : dict):
 	app = clz(view_args)
 	app.run()
 
+def _start_graph(view_args : dict):
+	module = __import__("graph_view")
+	clz = getattr(module, "GraphView")
+	app = clz(view_args)
+	app.run()
+
 def _init_logging():
 	if not config.LOGFILE:
 		return
