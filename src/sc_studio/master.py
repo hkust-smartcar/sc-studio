@@ -288,4 +288,4 @@ class Master(object):
 			print(label + product)
 			return product
 		else:
-			return input("> ")
+			return input(label)
